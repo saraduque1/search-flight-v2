@@ -10,12 +10,7 @@ public class FlightClassMapper {
     }
 
     public static FlightClassDTO mapToFlightClassDTO(FlightClass flightClass) {
-        if (flightClass == null) {
-            return null;
-        }
-
         FlightClassDTO flightClassDTO = new FlightClassDTO();
-        flightClassDTO.setFlightClassId(flightClass.getFlightClassId());
         flightClassDTO.setNameTypeClass(flightClass.getNameTypeClass());
         flightClassDTO.setPrice(flightClass.getPrice());
 

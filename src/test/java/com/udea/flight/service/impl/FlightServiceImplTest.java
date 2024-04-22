@@ -1,117 +1,84 @@
 package com.udea.flight.service.impl;
 
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.udea.flight.domain.dto.FlightDTO;
+import com.udea.flight.domain.model.City;
 import com.udea.flight.domain.model.Flight;
+import com.udea.flight.domain.model.FlightClass;
+import com.udea.flight.repository.CityRepository;
+import com.udea.flight.repository.FlightClassRepository;
 import com.udea.flight.repository.FlightRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
+@ExtendWith(MockitoExtension.class)
 public class FlightServiceImplTest {
-
-    @InjectMocks
-    private FlightServiceImpl flightSearchService;
 
     @Mock
     private FlightRepository flightRepository;
 
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
+    @Mock
+    private CityRepository cityRepository;
+
+    @Mock
+    private FlightClassRepository flightClassRepository;
+
+    @InjectMocks
+    private FlightServiceImpl flightService;
+
+    @Test
+    public void testSearchFlights_AllEntitiesFound_FlightsAvailable() {
+        City city = new City();
+        city.setCityName("SomeCityName"); // Ensure properties are set if they affect logic
+        FlightClass flightClass = new FlightClass();
+        flightClass.setNameTypeClass("Economy");
+
+        List<Flight> flights = List.of(new Flight());
+
+        // Use more specific matchers or ensure properties are set so objects match expectations
+        when(cityRepository.findByCityName(eq("New York"))).thenReturn(city);
+        when(cityRepository.findByCityName(eq("Los Angeles"))).thenReturn(city);
+        when(flightClassRepository.findByNameTypeClass(eq("Economy"))).thenReturn(flightClass);
+        when(flightRepository.findFlights(eq(city.getCityName()), eq(city.getCityName()), any(LocalDate.class), any(LocalDate.class), eq(flightClass.getNameTypeClass()), eq(1))).thenReturn(flights);
+
+        List<FlightDTO> result = flightService.searchFlights("New York", "Los Angeles", LocalDate.now(), LocalDate.now().plusDays(1), "Economy", 1);
+
+        assertFalse(result.isEmpty());
+        verify(flightRepository).findFlights(anyString(), anyString(), any(), any(), anyString(), anyInt());
+    }
+
+
+    @Test
+    public void testSearchFlights_EntityNotFound() {
+        when(cityRepository.findByCityName("New York")).thenReturn(null);
+
+        List<FlightDTO> result = flightService.searchFlights("New York", "Los Angeles", LocalDate.now(), LocalDate.now().plusDays(1), "Economy", 1);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void testSearchFlightsByDepartureDate() {
-        String originCity = "OriginCity";
-        String destinationCity = "DestinationCity";
-        LocalDate departureDate = LocalDate.now();
+    public void testSearchFlights_NoFlightsFound() {
+        City city = new City();
+        FlightClass flightClass = new FlightClass();
 
-        Flight flight = new Flight();
-        flight.setOriginCity(originCity);
-        flight.setDestinationCity(destinationCity);
-        flight.setDepartureDate(departureDate);
+        when(cityRepository.findByCityName("New York")).thenReturn(city);
+        when(cityRepository.findByCityName("Los Angeles")).thenReturn(city);
+        when(flightClassRepository.findByNameTypeClass("Economy")).thenReturn(flightClass);
+        when(flightRepository.findFlights(anyString(), anyString(), any(), any(), anyString(), anyInt())).thenReturn(Collections.emptyList());
 
-        when(flightRepository.findFlightsByDepartureDate(originCity, destinationCity, departureDate))
-                .thenReturn(Arrays.asList(flight));
+        List<FlightDTO> result = flightService.searchFlights("New York", "Los Angeles", LocalDate.now(), LocalDate.now().plusDays(1), "Economy", 1);
 
-        List<FlightDTO> result = flightSearchService.searchFlightsByDepartureDate(originCity, destinationCity, departureDate);
-
-        assertEquals(1, result.size());
-        FlightDTO resultFlight = result.get(0);
-        assertEquals(originCity, resultFlight.getOriginCity());
-        assertEquals(destinationCity, resultFlight.getDestinationCity());
-        assertEquals(departureDate, resultFlight.getDepartureDate());
-    }
-
-    @Test
-    void testSearchFlightsByDepartureAndArrivalDate() {
-        String originCity = "OriginCity";
-        String destinationCity = "DestinationCity";
-        LocalDate departureDate = LocalDate.now();
-        LocalDate arrivalDate = LocalDate.now().plusDays(5);
-
-        Flight flight = new Flight();
-        flight.setOriginCity(originCity);
-        flight.setDestinationCity(destinationCity);
-        flight.setDepartureDate(departureDate);
-        flight.setArrivalDate(arrivalDate);
-
-        when(flightRepository.findFlightsByDepartureAndArrivalDate(originCity, destinationCity, departureDate, arrivalDate))
-                .thenReturn(Arrays.asList(flight));
-
-        List<FlightDTO> result = flightSearchService.searchFlightsByDepartureAndArrivalDate(originCity, destinationCity, departureDate, arrivalDate);
-
-        assertEquals(1, result.size());
-        FlightDTO resultFlight = result.get(0);
-        assertEquals(originCity, resultFlight.getOriginCity());
-        assertEquals(destinationCity, resultFlight.getDestinationCity());
-        assertEquals(departureDate, resultFlight.getDepartureDate());
-        assertEquals(arrivalDate, resultFlight.getArrivalDate());
-    }
-
-    @Test
-    void testSearchFlightsByOriginAndDestination() {
-        String originCity = "OriginCity";
-        String destinationCity = "DestinationCity";
-
-        Flight flight = new Flight();
-        flight.setOriginCity(originCity);
-        flight.setDestinationCity(destinationCity);
-
-        when(flightRepository.findFlightsByOriginAndDestination(originCity, destinationCity))
-                .thenReturn(Arrays.asList(flight));
-
-        List<FlightDTO> result = flightSearchService.searchFlightsByOriginAndDestination(originCity, destinationCity);
-
-        assertEquals(1, result.size());
-        FlightDTO resultFlight = result.get(0);
-        assertEquals(originCity, resultFlight.getOriginCity());
-        assertEquals(destinationCity, resultFlight.getDestinationCity());
-    }
-
-    @Test
-    void testSearchFlightsByPrice() {
-        Double price = 100.0;
-
-        Flight flight = new Flight();
-        flight.setPrice(price);
-
-        when(flightRepository.findFlightsByPrice(price))
-                .thenReturn(Arrays.asList(flight));
-
-        List<FlightDTO> result = flightSearchService.searchFlightsByPrice(price);
-
-        assertEquals(1, result.size());
-        FlightDTO resultFlight = result.get(0);
-        assertEquals(price, resultFlight.getPrice());
+        assertTrue(result.isEmpty());
     }
 }
+

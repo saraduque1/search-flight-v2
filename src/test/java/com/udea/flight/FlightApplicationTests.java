@@ -1,6 +1,6 @@
 package com.udea.flight;
 
-import com.udea.flight.service.FlightService;
+import com.udea.flight.service.FlightServiceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class FlightApplicationTests {
 
 	@Autowired
-	private FlightService flightService;
+	private FlightServiceTest flightServiceTest;
 
 	@Test
 	void contextLoads() {
-		assertNotNull(flightService);
+		assertNotNull(flightServiceTest);
 	}
 
 }

@@ -10,10 +10,6 @@ public class CityMapper {
     }
 
     public static CityDTO mapToCityDTO(City city) {
-        if (city == null) {
-            return null;
-        }
-
         CityDTO cityDTO = new CityDTO();
         cityDTO.setCityId(city.getCityId());
         cityDTO.setCityName(city.getCityName());
