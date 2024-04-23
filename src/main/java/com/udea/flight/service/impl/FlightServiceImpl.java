@@ -56,5 +56,6 @@ public class FlightServiceImpl implements FlightService {
                 .map(flight -> FlightMapper.mapToFlightDTO(flight, numberOfPeople, originCity, destinationCity, flightClass))
                 .toList();
     }
+
 }
 
